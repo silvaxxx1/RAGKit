@@ -8,11 +8,11 @@ FILE_MAX_SIZE=10
 FILE_DEFAULT_CHUNK_SIZE=512000  # 512KB
 
 # ========================= Postgres Config ==================
-POSTGRES_USERNAME="postgres"
-POSTGRES_PASSWORD="raggapp_postgres123"
-POSTGRES_HOST="pgvector" 
+POSTGRES_USERNAME=""
+POSTGRES_PASSWORD=""
+POSTGRES_HOST="" 
 POSTGRES_PORT=5432
-POSTGRES_MAIN_DATABASE="RagApp"
+POSTGRES_MAIN_DATABASE=""
 
 # ========================= LLM Config =======================
 GENERATION_BACKEND="openai"
