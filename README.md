@@ -1,16 +1,26 @@
-# 🧠 RAGKit
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="docs/assets/logo-horizontal-dark.svg">
+    <img src="docs/assets/logo-horizontal.svg" alt="RAGKit" width="420"/>
+  </picture>
+</p>
 
-**A modular, production-oriented foundation for building Retrieval-Augmented Generation (RAG) systems.**
+<p align="center">
+  <strong>A modular, production-oriented foundation for building Retrieval-Augmented Generation systems.</strong>
+</p>
 
-RAGKit takes you from ingestion → parsing → chunking → embeddings → vector storage → retrieval → generation, without locking you into a single vector database, embedding provider, or LLM.
-
-It's built to be the project you clone when you're starting a real RAG system, not a toy demo.
+<p align="center">
+  <img src="https://img.shields.io/badge/python-3.11+-4F46E5.svg" alt="Python"/>
+  <img src="https://img.shields.io/badge/FastAPI-async--first-7C3AED.svg" alt="FastAPI"/>
+  <img src="https://img.shields.io/badge/tests-79%20passing-22D3EE.svg" alt="Tests"/>
+  <img src="https://img.shields.io/badge/license-MIT-71717A.svg" alt="License"/>
+</p>
 
 ---
 
-<p align="center">
-  <img src="ragapp.png" alt="RAGKit Architecture" width="700"/>
-</p>
+RAGKit takes you from **ingestion → parsing → chunking → embeddings → vector storage → retrieval → generation** without locking you into a single vector database, embedding provider, or LLM.
+
+It's the project you clone when you're starting a real RAG system — not a demo.
 
 ---
 
@@ -22,7 +32,7 @@ Most RAG projects start as a tightly coupled chain:
 PDF → LangChain → Vector DB → OpenAI
 ```
 
-That works for a prototype, but becomes hard to extend as requirements grow — different vector stores per environment, different embedding models, OCR for scanned documents, multimodal inputs, custom chunking rules.
+That works for a prototype, but becomes hard to extend as requirements grow — a different vector store per environment, a different embedding model, OCR for scanned documents, multimodal inputs, custom chunking rules.
 
 RAGKit separates these concerns behind explicit interfaces so each piece can be swapped, extended, or replaced independently.
 
@@ -43,65 +53,59 @@ RAGKit separates these concerns behind explicit interfaces so each piece can be 
 
 ## ✅ Status — v2.0.0
 
-* **Vector storage**: fully migrated to PostgreSQL + PGVector (MongoDB removed). Qdrant remains supported as a second backend — switch between them with one `.env` variable.
-* **Chunking**: custom token-aware chunker, no LangChain dependency required (LangChain chunking can still be enabled optionally).
-* **Pipelines**: async ingestion and retrieval paths, reworked for throughput.
-* **Backend**: stable and deployable; Celery + Redis for distributed background processing is the next milestone.
+* **Vector storage** — fully migrated to PostgreSQL + PGVector (MongoDB removed). Qdrant remains fully supported; switch backends with a single `.env` variable.
+* **Chunking** — custom token-aware chunker, no LangChain dependency required (LangChain chunking stays available as an option).
+* **Pipelines** — async ingestion and retrieval paths, reworked for throughput.
+* **Backend** — stable and deployable. Celery + Redis for distributed background processing is the next milestone.
 
 ---
 
-## 🧰 Toolbox (in progress)
+## 🧰 The Toolbox
 
-The goal is for RAGKit to be a configurable toolbox you start production RAG projects from — not just a vector-DB wrapper. Planned additions, following the same provider-interface pattern used for LLMs and vector stores:
+RAGKit is meant to be a **configurable toolbox you start production RAG projects from** — not just a vector-DB wrapper. Everything below follows the same provider-interface pattern already used for LLMs and vector stores, so adopting any of it is a config change, not a rewrite.
 
-* **Pluggable chunking strategies** — fixed-size, semantic, recursive, and document-structure-aware chunkers selectable via config, instead of one hardcoded strategy.
-* **Out-of-the-box OCR** — ingest scanned PDFs and images directly into the pipeline, with OCR as a swappable provider (e.g. Tesseract, cloud OCR APIs).
-* **Multimodal support** — image + text embeddings and multimodal-capable LLMs, so ingestion isn't limited to plain text documents.
+| Tool | Status | What it gives you |
+| ---- | ------ | ----------------- |
+| **Vector stores** | ✅ Shipped | PGVector, Qdrant — unified interface, `.env` switchable |
+| **LLM providers** | ✅ Shipped | OpenAI, Cohere, Ollama |
+| **Embedding providers** | ✅ Shipped | OpenAI, Cohere, Sentence Transformers |
+| **Token-aware chunking** | ✅ Shipped | Custom chunker, LangChain optional |
+| **Chunking strategies** | 🔜 Planned | Fixed-size, semantic, recursive, structure-aware — selectable per project |
+| **OCR ingestion** | 🔜 Planned | Scanned PDFs and images into the pipeline, OCR as a swappable provider |
+| **Multimodal** | 🔜 Planned | Image + text embeddings and multimodal-capable LLMs |
 
-These will land as new provider interfaces under `stores/`, configured the same way vector DBs and LLMs are today — no changes to application logic required to adopt them.
+Planned tools land as new provider interfaces under `stores/` and are selected the same way as everything else:
+
+```env
+CHUNKING_STRATEGY=semantic
+OCR_PROVIDER=tesseract
+```
 
 ---
 
 ## ✨ Features
 
-### 🧩 Modular Architecture
+### 🧩 Modular architecture
 Provider implementations are isolated from application logic — swap components without touching the pipeline.
 
-### 🗄️ Multiple Vector Stores
-* PostgreSQL + PGVector (primary)
-* Qdrant
+### 🗄️ Multiple vector stores
+PostgreSQL + PGVector (primary) and Qdrant, behind one interface.
 
 ```env
 VECTOR_DB_PROVIDER=pgvector   # or qdrant
 ```
 
-### 🤖 Multiple LLM Providers
-* OpenAI
-* Cohere
-* Ollama
+### ⚡ Async-first backend
+FastAPI + Uvicorn, structured so heavier ingestion workloads can move to dedicated workers.
 
-### 🔢 Multiple Embedding Providers
-* OpenAI
-* Cohere
-* Sentence Transformers
-
-### ✂️ Custom Chunking
-Token-aware chunking built for the pipeline, with optional LangChain fallback.
-
-### ⚡ Async-First Backend
-FastAPI + Uvicorn, built so heavier ingestion workloads can move to dedicated workers later.
-
-### 🐳 Dockerized Infrastructure
+### 🐳 Dockerized infrastructure
 PostgreSQL, PGVector, and Qdrant all runnable via Docker Compose.
 
 ### 🧪 Testing
-```text
-79 tests passing
-```
-Runs without requiring the full infrastructure stack.
+`79 tests passing`, designed to run **without** the full infrastructure stack — validate components before deploying anything.
 
 ### 📊 Observability
-Prometheus metrics (`rag_query_latency_seconds`, `retrieval_hit_rate`, etc.), kept separate from core RAG logic.
+Prometheus metrics (`rag_query_latency_seconds`, `retrieval_hit_rate`), kept separate from core RAG logic.
 
 ---
 
@@ -112,17 +116,17 @@ Prometheus metrics (`rag_query_latency_seconds`, `retrieval_hit_rate`, etc.), ke
                     │
                     ▼
               ┌───────────┐
-              │  Parser   │  (OCR planned)
+              │  Parser   │  ← OCR (planned)
               └─────┬─────┘
                     │
                     ▼
               ┌───────────┐
-              │  Chunker  │  (pluggable strategies planned)
+              │  Chunker  │  ← pluggable strategies (planned)
               └─────┬─────┘
                     │
                     ▼
              ┌────────────┐
-             │ Embeddings │  (multimodal planned)
+             │ Embeddings │  ← multimodal (planned)
              └──────┬─────┘
                     │
                     ▼
@@ -143,77 +147,93 @@ Prometheus metrics (`rag_query_latency_seconds`, `retrieval_hit_rate`, etc.), ke
                  Response
 ```
 
+The goal is not to hide the architecture behind a framework. **RAGKit keeps the major RAG components visible and replaceable.**
+
 ---
 
 ## 📦 Tech Stack
 
-| Layer              | Technology                              |
-| ------------------ | ---------------------------------------- |
-| API                | FastAPI + Uvicorn                        |
-| Language           | Python                                   |
-| Package Management | uv                                       |
-| Vector Store       | PostgreSQL + PGVector / Qdrant           |
-| Embeddings         | OpenAI / Cohere / Sentence Transformers  |
-| LLM                | OpenAI / Cohere / Ollama                 |
-| Chunking           | Custom token-aware chunker               |
-| Database           | PostgreSQL                               |
-| Infrastructure     | Docker / Docker Compose                  |
-| Observability      | Prometheus                               |
-| Testing            | Pytest                                   |
+| Layer | Technology |
+| ----- | ---------- |
+| API | FastAPI + Uvicorn |
+| Language | Python |
+| Package management | uv |
+| Vector store | PostgreSQL + PGVector / Qdrant |
+| Embeddings | OpenAI / Cohere / Sentence Transformers |
+| LLM | OpenAI / Cohere / Ollama |
+| Chunking | Custom token-aware chunker |
+| Database | PostgreSQL |
+| Infrastructure | Docker / Docker Compose |
+| Observability | Prometheus |
+| Testing | Pytest |
 
 ---
 
 ## 🚀 Quickstart
 
-### 1. Clone
+**1. Clone**
 ```bash
-git clone https://github.com/silvaxxx1/RagApp.git
-cd RagApp
+git clone https://github.com/silvaxxx1/RAGKit.git
+cd RAGKit
 ```
 
-### 2. Install dependencies
+**2. Install dependencies**
 ```bash
 uv init
 uv add -r requirements.txt
 ```
 
-### 3. Configure environment
+**3. Configure environment**
 ```bash
 cp uv.example .env
 ```
-Set your API keys and choose providers:
 ```env
 VECTOR_DB_PROVIDER=pgvector   # or qdrant
 EMBEDDING_PROVIDER=openai
 LLM_PROVIDER=openai
 ```
 
-### 4. Start infrastructure
+**4. Start infrastructure**
 ```bash
 cd docker
 docker-compose up -d
 ```
 
-### 5. Run the backend
+**5. Run the backend**
 ```bash
 uvicorn main:app --reload --host 0.0.0.0 --port 5000
 ```
 Swagger UI → [http://localhost:5000/docs](http://localhost:5000/docs)
 
-### 6. Run tests
+**6. Run tests**
 ```bash
 pytest
 ```
 
 ---
 
+## ⚙️ Configuration
+
+Provider selection is configuration-driven.
+
+```env
+VECTOR_DB_PROVIDER=pgvector      # pgvector | qdrant
+EMBEDDING_PROVIDER=openai        # openai | cohere | sentence_transformers
+LLM_PROVIDER=openai              # openai | cohere | ollama
+```
+
+Changing providers should never require rewriting the RAG pipeline.
+
+---
+
 ## 🧱 Design Principles
 
-1. **Separation of concerns** — the RAG pipeline shouldn't depend on a specific database or model provider.
+1. **Separation of concerns** — the pipeline shouldn't depend on a specific database or model provider.
 2. **Replaceable infrastructure** — swap providers without rewriting business logic.
 3. **Explicit abstractions** — every core component has a clear interface.
-4. **Configuration over hard-coding** — provider selection lives in `.env`, not code.
-5. **Production-oriented foundations** — patterns that hold up moving from local dev to production.
+4. **Configuration over hard-coding** — provider selection lives in `.env`, not in code.
+5. **Understandable architecture** — easy to read, modify, and extend.
+6. **Production-oriented foundations** — patterns that survive the move from local dev to production.
 
 ---
 
@@ -232,20 +252,30 @@ pytest
 
 **Retrieval**
 - [ ] Hybrid dense + BM25 retrieval
+- [ ] Reciprocal Rank Fusion
 - [ ] Reranking
-- [ ] Multi-query / parent-child retrieval
+- [ ] Multi-query and parent-child retrieval
 
 **Evaluation**
+- [ ] Retrieval and generation evaluation
 - [ ] RAGAS integration
 - [ ] Golden datasets and latency benchmarking
 
 ---
 
+## 🔭 RAGKit vs. Production Platforms
+
+RAGKit focuses on the **foundation**, and doesn't try to solve every production concern out of the box.
+
+For environments involving strict data residency, distributed ingestion, advanced retrieval, dedicated inference infrastructure, and compliance requirements, a purpose-built platform architecture may be the better fit. RAGKit is where you start — and what you extend.
+
+---
+
 ## 🤝 Contributing
 
-Contributions are welcome — new vector-store providers, embedding/LLM providers, chunking strategies, OCR backends, retrieval strategies, or documentation.
+Contributions are welcome: new vector-store providers, embedding and LLM providers, chunking strategies, OCR backends, retrieval strategies, evaluation tools, deployment templates, and documentation.
 
-The preferred pattern is to extend an existing interface rather than add provider-specific logic into the application layer.
+The preferred pattern is to **extend an existing interface** rather than add provider-specific logic to the application layer.
 
 ---
 
